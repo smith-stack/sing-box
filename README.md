@@ -6,7 +6,7 @@
 ## **更新内容**
 - **V 1.3**
 - **脚本适配 sing-box 1.90+。**
-- **更新Clash配置信息，请自行配合Clash Verge使用。**
+- **更新Clash配置信息，PC端配合Clash Verge使用，Android端配合Clash Meta for Android使用。**
 
 ## **说明**
 - **脚本使用sing-box、Juicity内核。**
