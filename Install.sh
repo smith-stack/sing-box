@@ -206,7 +206,7 @@ function check_firewall_configuration() {
     esac
 }
 
-# 检查sing-box所需的文件夹及配置文件
+# 检查 sing-box 所需的文件夹及配置文件
 function create_sing_box_folders() {
     local folders=("/usr/local/etc/sing-box" "/etc/ssl/private")
 
@@ -218,7 +218,7 @@ function create_sing_box_folders() {
     done
 }
 
-# 检查juicity所需的文件夹及配置文件
+# 检查 Juicity 所需的文件夹及配置文件
 function create_juicity_folder() {
     local folders=("/usr/local/etc/juicity" "/etc/ssl/private")
 
@@ -230,7 +230,7 @@ function create_juicity_folder() {
     done
 }
 
-# 检查clash配置文件是否存在
+# 检查 Clash 配置文件是否存在
 function ensure_clash_yaml() {
     local clash_yaml="/usr/local/etc/sing-box/clash.yaml"
 
@@ -239,7 +239,7 @@ function ensure_clash_yaml() {
     fi
 }
 
-# 检查sing-box配置文件是否存在
+# 检查 sing-box 配置文件是否存在
 function check_config_file_existence() {
     local config_file="/usr/local/etc/sing-box/config.json"
 
@@ -249,7 +249,7 @@ function check_config_file_existence() {
     fi
 }
 
-# 生成naive客户端随机文件名
+# 生成 NaiveProxy 客户端随机文件名
 function generate_naive_random_filename() {
     local dir="/usr/local/etc/sing-box"
     local filename=""
@@ -266,7 +266,7 @@ function generate_naive_random_filename() {
     done
 }
 
-# 安装sing-box
+# 安装 sing-box
 function install_sing_box() {
     if [[ -f "/usr/local/bin/sing-box" && -f "/usr/local/etc/sing-box/config.json" ]]; then
         return 1
@@ -279,7 +279,7 @@ function install_sing_box() {
     fi
 }
 
-# 配置DNS64
+# 配置 DNS64
 function configure_dns64() {
     if [[ -n $ip_v4 ]]; then
         return
@@ -294,7 +294,7 @@ function configure_dns64() {
     fi
 }
 
-# 配置BBR
+# 配置 BBR
 function enable_bbr() {
     if grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
         echo "BBR is already enabled, skipping configuration."
@@ -321,7 +321,7 @@ function enable_bbr() {
     done
 }
 
-# 选择sing-box的安装方式
+# 选择 sing-box 的安装方式
 function select_sing_box_install_option() {
     while true; do
         echo "请选择 sing-box 的安装方式（默认1）："
@@ -353,7 +353,7 @@ function select_sing_box_install_option() {
     done
 }
 
-# 安装Go
+# 安装 go
 function install_go() {
     if ! command -v go &> /dev/null; then
         echo "Downloading Go..."
@@ -392,7 +392,7 @@ function install_go() {
     fi
 }
 
-# 编译安装sing-box
+# 编译安装 sing-box
 function compile_install_sing_box() {
     local go_install_command="go install -v -tags \
 with_quic,\
@@ -506,7 +506,7 @@ function install_Pre_release_sing_box() {
     fi
 }
 
-# 安装最新版本的 juicity
+# 安装最新版本的 Juicity
 function install_latest_juicity() {
     local arch=$(uname -m)
 
@@ -599,7 +599,7 @@ WantedBy=multi-user.target'
     echo "sing-box startup service has been configured."
 }
 
-# 配置 juicity 启动服务
+# 配置 Juicity 启动服务
 function configure_juicity_service() {
     echo "Configuring juicity startup service..."
 
@@ -933,7 +933,7 @@ function set_target_server() {
     done
 }
 
-# 获取本机IP地址
+# 获取本机 IP 地址
 function get_local_ip() {
     local local_ip_v4
     local local_ip_v6
@@ -967,7 +967,7 @@ function get_local_ip() {
     fi
 }
 
-# 获取ECH密钥
+# 获取 ECH 密钥
 function get_ech_keys() {
     local input_file="/etc/ssl/private/ech.tmp"
     local output_file="/etc/ssl/private/ech.pem"
@@ -1006,7 +1006,7 @@ function get_ech_keys() {
     rm "$input_file"
 }
 
-# 配置域名，并验证其是否绑定本机IP
+# 配置域名，并验证其是否绑定本机 IP
 function get_domain() {
     while true; do
         read -p "请输入域名（关闭Cloudflare代理）： " user_domain
@@ -1383,7 +1383,7 @@ function generate_private_key() {
     private_key="$local_private_key"
 }
 
-# 配置自签名证书
+# 配置自签证书
 function create_self_signed_cert() {
     while true; do
         read -p "请输入要用于自签名证书的域名（默认为 bing.com）: " user_domain
@@ -2427,7 +2427,7 @@ function extract_variables_and_cleanup() {
     rm "$temp_file"
 }
 
-# 日志出站配置
+# 配置日志、出站
 function log_outbound_config() {
     local config_file="/usr/local/etc/sing-box/config.json"
 
@@ -2904,7 +2904,7 @@ function write_clash_yaml() {
     fi
 }
 
-# 生成 NaiveProxy 客户端配置信息
+# 生成 NaiveProxy Windows 客户端配置信息
 function write_naive_client_file() {
     local naive_client_file="$naive_client_filename"
 
@@ -4114,7 +4114,7 @@ function generate_naive_win_client_config() {
     echo "电脑端配置文件已保存至$naive_client_file，请下载后使用！"
 }
 
-# 提取节点配置中的协议类型和标签，并进行过滤和显示
+# 提取节点配置中的协议类型和标签
 function extract_types_tags() {
     local config_file="/usr/local/etc/sing-box/config.json"
     filtered_tags=()
@@ -4908,7 +4908,6 @@ function display_reality_config_info() {
     echo "配置信息已保存至 $output_file"
 }
 
-
 # 生成 VLESS 客户端配置文件
 function display_reality_config_files() {
     local config_file="/usr/local/etc/sing-box/config.json"
@@ -5044,7 +5043,6 @@ function display_vmess_config_info() {
     echo "" >> "$output_file"
     echo "配置信息已保存至 $output_file"
 }
-
 
 # 生成 VMess 客户端配置文件
 function display_vmess_config_files() {
@@ -5321,7 +5319,7 @@ function uninstall_sing_box() {
     echo "sing-box 卸载完成。"
 }
 
-# 卸载 juicity
+# 卸载 Juicity
 function uninstall_juicity() {
     echo "开始卸载 juicity..."
     systemctl stop juicity.service
