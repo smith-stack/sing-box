@@ -30,7 +30,7 @@ yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c
 ```
 - **使用以下命令运行脚本**
 ```
-wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/main/sing-box.sh && chmod +x /root/singbox.sh && ln -sf /root/singbox.sh /usr/local/bin/singbox && bash /root/singbox.sh
+wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Install.sh && chmod +x /root/singbox.sh && ln -sf /root/singbox.sh /usr/local/bin/singbox && bash /root/singbox.sh
 ```
 
 ## **使用方法**
