@@ -4,9 +4,9 @@
 - **若有侵权，请联系本人删库。**
 
 ## **更新内容**
-- **V 1.3**
+- **V 1.4**
 - **脚本适配 sing-box 1.90+。**
-- **更新Clash配置信息，PC端配合Clash Verge使用，Android端配合Clash Meta for Android使用。**
+- **修复已知的问题。**
 
 ## **说明**
 - **脚本使用sing-box、Juicity内核。**
@@ -34,6 +34,7 @@ wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-b
 ```
 
 ## **使用方法**
+- **如果开启ECH配置则不会生成Clash客户端配置文件。**
 - **Clash客户端配置文件位于/usr/local/etc/sing-box/clash.yaml，下载后加载到 Clash 客户端即可使用，需要配合 Meta 内核。**
 - **sing-box电脑端配置文件位于/usr/local/etc/sing-box/win_client.json，下载后加载到 V2rayN、SFM 客户端即可使用。**
 - **sing-box手机端配置文件位于/usr/local/etc/sing-box/phone_client.json，下载后加载到 SFA、SFI 客户端即可使用。**
