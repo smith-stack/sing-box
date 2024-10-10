@@ -1,23 +1,18 @@
-## **免责声明**
-- **本项目旨在维护 TinrLin 的脚本。**
-- **本项目仅供学习与交流，禁止用于商业或非法目的，否则后果自负。**
-- **若有侵权，请联系本人删库。**
-
 ## **更新内容**
 - **V 1.4**
 - **脚本适配 sing-box 1.90+。**
 - **修复已知的问题。**
 
-## **说明**
+## **项目说明**
 - **脚本使用sing-box、Juicity内核。**
 - **脚本支持 CentOS 8+、Debian 10+、Ubuntu 20+ 操作系统。**
 - **脚本所有协议均支持自签证书（NaiveProxy除外）。**
 - **脚本支持多用户。**
 - **脚本支持所有协议共存。**
 - **脚本支持自签100年证书。**
-- **脚本支持自动续签证书。**
 - **脚本支持HTTP、WebSocket、gRPC、HTTPUpgrade传输协议。**
 - **脚本支持 Multiplex、TCP Brutal、ECH 配置；若要启用 Multiplex、TCP Brutal，sing-box 内核需 ≥1.7.0，请在服务端自行安装 TCP Brutal。**
+- **脚本支持自定义各种配置参数，如果不想修改一路回车即可，脚本会自动随机生成配置（包括用户名、UUID、用户密码等）；如果想修改的话，根据脚本提示输入即可。**
 
 ## **安装**
 - **Debian&&Ubuntu使用以下命令安装依赖**
@@ -76,3 +71,12 @@ wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-b
 - **VMess+H2C+TLS**
 - **VMess+gRPC+TLS** 
 - **VMess+HTTPUpgrade+TLS** 
+
+## **鸣谢**
+- **TinrLin 的脚本，作者已删库。**
+- **chise0713 的获取 Warp 账号脚本：https://github.com/chise0713/warp-reg.sh。**
+
+## **免责声明**
+- **本项目旨在维护 TinrLin 的脚本。**
+- **本项目仅供学习与交流，请于下载后 24 小时内删除，禁止用于商业或非法目的。**
+- **使用本脚本必循遵守部署服务器所在地、所在国家和用户所在国家的法律法规，脚本作者及维护者不对使用者的任何不当行为负责。**
