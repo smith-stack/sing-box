@@ -72,10 +72,6 @@ wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-b
 - **VMess+gRPC+TLS** 
 - **VMess+HTTPUpgrade+TLS** 
 
-## **鸣谢**
-- **TinrLin 的脚本，作者已删库。**
-- **chise0713 的获取 Warp 账号脚本：https://github.com/chise0713/warp-reg.sh**
-
 ## **免责声明**
 - **本项目旨在维护 TinrLin 的脚本。**
 - **本项目仅供学习与交流，请于下载后 24 小时内删除，禁止用于商业或非法目的。**
