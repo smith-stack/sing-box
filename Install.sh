@@ -206,7 +206,7 @@ function check_firewall_configuration() {
     esac
 }
 
-# 检查 sing-box 所需的文件夹及配置文件
+# 检查sing-box所需的文件夹及配置文件
 function create_sing_box_folders() {
     local folders=("/usr/local/etc/sing-box" "/etc/ssl/private")
 
@@ -218,7 +218,7 @@ function create_sing_box_folders() {
     done
 }
 
-# 检查 Juicity 所需的文件夹及配置文件
+# 检查juicity所需的文件夹及配置文件
 function create_juicity_folder() {
     local folders=("/usr/local/etc/juicity" "/etc/ssl/private")
 
@@ -230,7 +230,7 @@ function create_juicity_folder() {
     done
 }
 
-# 检查 Clash 配置文件是否存在
+# 检查clash配置文件是否存在
 function ensure_clash_yaml() {
     local clash_yaml="/usr/local/etc/sing-box/clash.yaml"
 
@@ -239,7 +239,7 @@ function ensure_clash_yaml() {
     fi
 }
 
-# 检查 sing-box 配置文件是否存在
+# 检查sing-box配置文件是否存在
 function check_config_file_existence() {
     local config_file="/usr/local/etc/sing-box/config.json"
 
@@ -249,7 +249,7 @@ function check_config_file_existence() {
     fi
 }
 
-# 生成 NaiveProxy 客户端随机文件名
+# 生成naive客户端随机文件名
 function generate_naive_random_filename() {
     local dir="/usr/local/etc/sing-box"
     local filename=""
@@ -266,7 +266,7 @@ function generate_naive_random_filename() {
     done
 }
 
-# 安装 sing-box
+# 安装sing-box
 function install_sing_box() {
     if [[ -f "/usr/local/bin/sing-box" && -f "/usr/local/etc/sing-box/config.json" ]]; then
         return 1
@@ -279,7 +279,7 @@ function install_sing_box() {
     fi
 }
 
-# 配置 DNS64
+# 配置DNS64
 function configure_dns64() {
     if [[ -n $ip_v4 ]]; then
         return
@@ -294,7 +294,7 @@ function configure_dns64() {
     fi
 }
 
-# 配置 BBR
+# 配置BBR
 function enable_bbr() {
     if grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
         echo "BBR is already enabled, skipping configuration."
@@ -321,7 +321,7 @@ function enable_bbr() {
     done
 }
 
-# 选择 sing-box 的安装方式
+# 选择sing-box的安装方式
 function select_sing_box_install_option() {
     while true; do
         echo "请选择 sing-box 的安装方式（默认1）："
@@ -353,7 +353,7 @@ function select_sing_box_install_option() {
     done
 }
 
-# 安装 go
+# 安装Go
 function install_go() {
     if ! command -v go &> /dev/null; then
         echo "Downloading Go..."
@@ -392,7 +392,7 @@ function install_go() {
     fi
 }
 
-# 编译安装 sing-box
+# 编译安装sing-box
 function compile_install_sing_box() {
     local go_install_command="go install -v -tags \
 with_quic,\
@@ -506,7 +506,7 @@ function install_Pre_release_sing_box() {
     fi
 }
 
-# 安装最新版本的 Juicity
+# 安装最新版本的 juicity
 function install_latest_juicity() {
     local arch=$(uname -m)
 
@@ -599,7 +599,7 @@ WantedBy=multi-user.target'
     echo "sing-box startup service has been configured."
 }
 
-# 配置 Juicity 启动服务
+# 配置 juicity 启动服务
 function configure_juicity_service() {
     echo "Configuring juicity startup service..."
 
@@ -933,7 +933,7 @@ function set_target_server() {
     done
 }
 
-# 获取本机 IP 地址
+# 获取本机IP地址
 function get_local_ip() {
     local local_ip_v4
     local local_ip_v6
@@ -967,7 +967,7 @@ function get_local_ip() {
     fi
 }
 
-# 获取 ECH 密钥
+# 获取ECH密钥
 function get_ech_keys() {
     local input_file="/etc/ssl/private/ech.tmp"
     local output_file="/etc/ssl/private/ech.pem"
@@ -1006,7 +1006,7 @@ function get_ech_keys() {
     rm "$input_file"
 }
 
-# 配置域名，并验证其是否绑定本机 IP
+# 配置域名，并验证其是否绑定本机IP
 function get_domain() {
     while true; do
         read -p "请输入域名（关闭Cloudflare代理）： " user_domain
@@ -1383,7 +1383,7 @@ function generate_private_key() {
     private_key="$local_private_key"
 }
 
-# 配置自签证书
+# 配置自签名证书
 function create_self_signed_cert() {
     while true; do
         read -p "请输入要用于自签名证书的域名（默认为 bing.com）: " user_domain
@@ -2427,7 +2427,7 @@ function extract_variables_and_cleanup() {
     rm "$temp_file"
 }
 
-# 配置日志、出站
+# 日志出站配置
 function log_outbound_config() {
     local config_file="/usr/local/etc/sing-box/config.json"
 
@@ -2880,7 +2880,7 @@ function write_phone_client_file() {
     local phone_client="${dir}/phone_client.json"
 
     if [ ! -s "${phone_client}" ]; then
-        awk 'BEGIN { print "{"; print "  \"log\": {"; print "    \"disabled\": false,"; print "    \"level\": \"warn\","; print "    \"timestamp\": true"; print "  },"; print "  \"dns\": {"; print "    \"servers\": ["; print "      {"; print "        \"tag\": \"dns_proxy\","; print "        \"address\": \"https://1.1.1.1/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"select\""; print "      },"; print "      {"; print "        \"tag\": \"dns_direct\","; print "        \"address\": \"https://120.53.53.53/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_local\","; print "        \"address\": \"223.5.5.5\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_block\","; print "        \"address\": \"rcode://success\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"outbound\": \"any\","; print "        \"server\": \"dns_local\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"server\": \"dns_proxy\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"server\": \"dns_block\","; print "        \"disable_cache\": true"; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-geolocation-cn\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"and\","; print "        \"rules\": ["; print "          {"; print "            \"rule_set\": \"geosite-geolocation-!cn\","; print "            \"invert\": true"; print "          },"; print "          {"; print "            \"rule_set\": \"geoip-cn\""; print "          }"; print "        ],"; print "        \"server\": \"dns_proxy\","; print "        \"client_subnet\": \"114.114.114.114/24\""; print "      }"; print "    ],"; print "    \"final\": \"dns_proxy\","; print "    \"strategy\": \"ipv4_only\","; print "    \"independent_cache\": true"; print "  },"; print "  \"route\": {"; print "    \"rule_set\": ["; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-category-ads-all\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-!cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geoip-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs\","; print "        \"download_detour\": \"select\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"protocol\": \"dns\""; print "          },"; print "          {"; print "            \"port\": 53"; print "          }"; print "        ],"; print "        \"outbound\": \"dns-out\""; print "      },"; print "      {"; print "        \"ip_is_private\": true,"; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"outbound\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"port\": 853"; print "          },"; print "          {"; print "            \"network\": \"udp\","; print "            \"port\": 443"; print "          },"; print "          {"; print "            \"protocol\": \"stun\""; print "          }"; print "        ],"; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": ["; print "          \"geoip-cn\","; print "          \"geosite-geolocation-cn\""; print "        ],"; print "        \"outbound\": \"direct-out\""; print "      }"; print "    ],"; print "    \"auto_detect_interface\": true"; print "  },"; print "  \"inbounds\": ["; print "    {"; print "      \"type\": \"tun\","; print "      \"tag\": \"tun-in\","; print "      \"inet4_address\": \"172.19.0.1/30\","; print "      \"inet6_address\": \"fdfe:dcba:9876::1/126\","; print "      \"mtu\": 9000,"; print "      \"auto_route\": true,"; print "      \"strict_route\": true,"; print "      \"stack\": \"gvisor\","; print "      \"sniff\": true,"; print "      \"sniff_override_destination\": false"; print "    }"; print "  ],"; print "  \"outbounds\": ["; print "    {"; print "      \"type\": \"urltest\","; print "      \"tag\": \"auto\","; print "      \"outbounds\": ["; print "      ],"; print "      \"url\": \"https://www.gstatic.com/generate_204\","; print "      \"interval\": \"1m\","; print "      \"tolerance\": 50,"; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"selector\","; print "      \"tag\": \"select\","; print "      \"outbounds\": ["; print "        \"auto\""; print "      ],"; print "      \"default\": \"auto\","; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"direct\","; print "      \"tag\": \"direct-out\""; print "    },"; print "    {"; print "      \"type\": \"block\","; print "      \"tag\": \"block\""; print "    },"; print "    {"; print "      \"type\": \"dns\","; print "      \"tag\": \"dns-out\""; print "    }"; print "  ],"; print "  \"experimental\": {"; print "    \"cache_file\": {"; print "      \"enabled\": true,"; print "      \"store_rdrc\": true"; print "    },"; print "    \"clash_api\": {"; print "      \"default_mode\": \"Rule\""; print "    }"; print "  }"; print "}" }' > "${phone_client}"
+        awk 'BEGIN { print "{"; print "  \"log\": {"; print "    \"disabled\": false,"; print "    \"level\": \"warn\","; print "    \"timestamp\": true"; print "  },"; print "  \"dns\": {"; print "    \"servers\": ["; print "      {"; print "        \"tag\": \"dns_proxy\","; print "        \"address\": \"https://1.1.1.1/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"\""; print "      },"; print "      {"; print "        \"tag\": \"dns_direct\","; print "        \"address\": \"https://120.53.53.53/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_local\","; print "        \"address\": \"223.5.5.5\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_block\","; print "        \"address\": \"rcode://success\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"outbound\": \"any\","; print "        \"server\": \"dns_local\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"server\": \"dns_proxy\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"server\": \"dns_block\","; print "        \"disable_cache\": true"; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-geolocation-cn\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"and\","; print "        \"rules\": ["; print "          {"; print "            \"rule_set\": \"geosite-geolocation-!cn\","; print "            \"invert\": true"; print "          },"; print "          {"; print "            \"rule_set\": \"geoip-cn\""; print "          }"; print "        ],"; print "        \"server\": \"dns_proxy\","; print "        \"client_subnet\": \"114.114.114.114/24\""; print "      }"; print "    ],"; print "    \"final\": \"dns_proxy\","; print "    \"strategy\": \"ipv4_only\","; print "    \"independent_cache\": true"; print "  },"; print "  \"route\": {"; print "    \"rule_set\": ["; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-category-ads-all\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-!cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geoip-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs\","; print "        \"download_detour\": \"\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"protocol\": \"dns\""; print "          },"; print "          {"; print "            \"port\": 53"; print "          }"; print "        ],"; print "        \"outbound\": \"dns-out\""; print "      },"; print "      {"; print "        \"ip_is_private\": true,"; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"outbound\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"port\": 853"; print "          },"; print "          {"; print "            \"network\": \"udp\","; print "            \"port\": 443"; print "          },"; print "          {"; print "            \"protocol\": \"stun\""; print "          }"; print "        ],"; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": ["; print "          \"geoip-cn\","; print "          \"geosite-geolocation-cn\""; print "        ],"; print "        \"outbound\": \"direct-out\""; print "      }"; print "    ],"; print "    \"auto_detect_interface\": true"; print "  },"; print "  \"inbounds\": ["; print "    {"; print "      \"type\": \"tun\","; print "      \"tag\": \"tun-in\","; print "      \"inet4_address\": \"172.19.0.1/30\","; print "      \"inet6_address\": \"fdfe:dcba:9876::1/126\","; print "      \"mtu\": 9000,"; print "      \"auto_route\": true,"; print "      \"strict_route\": true,"; print "      \"stack\": \"gvisor\","; print "      \"sniff\": true,"; print "      \"sniff_override_destination\": false"; print "    }"; print "  ],"; print "  \"outbounds\": ["; print "    {"; print "      \"type\": \"urltest\","; print "      \"tag\": \"auto\","; print "      \"outbounds\": ["; print "      ],"; print "      \"url\": \"https://www.gstatic.com/generate_204\","; print "      \"interval\": \"1m\","; print "      \"tolerance\": 50,"; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"selector\","; print "      \"tag\": \"select\","; print "      \"outbounds\": ["; print "        \"auto\""; print "      ],"; print "      \"default\": \"\","; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"direct\","; print "      \"tag\": \"direct-out\""; print "    },"; print "    {"; print "      \"type\": \"block\","; print "      \"tag\": \"block\""; print "    },"; print "    {"; print "      \"type\": \"dns\","; print "      \"tag\": \"dns-out\""; print "    }"; print "  ],"; print "  \"experimental\": {"; print "    \"cache_file\": {"; print "      \"enabled\": true,"; print "      \"store_rdrc\": true"; print "    },"; print "    \"clash_api\": {"; print "      \"default_mode\": \"Rule\""; print "    }"; print "  }"; print "}" }' > "${phone_client}"
     fi
 }
 
@@ -2890,8 +2890,20 @@ function write_win_client_file() {
     local win_client="${dir}/win_client.json"
 
     if [ ! -s "${win_client}" ]; then
-        awk 'BEGIN { print "{"; print "  \"log\": {"; print "    \"disabled\": false,"; print "    \"level\": \"warn\","; print "    \"timestamp\": true"; print "  },"; print "  \"dns\": {"; print "    \"servers\": ["; print "      {"; print "        \"tag\": \"dns_proxy\","; print "        \"address\": \"https://1.1.1.1/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"select\""; print "      },"; print "      {"; print "        \"tag\": \"dns_direct\","; print "        \"address\": \"https://120.53.53.53/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_local\","; print "        \"address\": \"223.5.5.5\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_block\","; print "        \"address\": \"rcode://success\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"outbound\": \"any\","; print "        \"server\": \"dns_local\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"server\": \"dns_proxy\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"server\": \"dns_block\","; print "        \"disable_cache\": true"; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-geolocation-cn\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"and\","; print "        \"rules\": ["; print "          {"; print "            \"rule_set\": \"geosite-geolocation-!cn\","; print "            \"invert\": true"; print "          },"; print "          {"; print "            \"rule_set\": \"geoip-cn\""; print "          }"; print "        ],"; print "        \"server\": \"dns_proxy\","; print "        \"client_subnet\": \"114.114.114.114/24\""; print "      }"; print "    ],"; print "    \"final\": \"dns_proxy\","; print "    \"strategy\": \"ipv4_only\","; print "    \"independent_cache\": true"; print "  },"; print "  \"route\": {"; print "    \"rule_set\": ["; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-category-ads-all\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-!cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs\","; print "        \"download_detour\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geoip-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs\","; print "        \"download_detour\": \"select\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"protocol\": \"dns\""; print "          },"; print "          {"; print "            \"port\": 53"; print "          }"; print "        ],"; print "        \"outbound\": \"dns-out\""; print "      },"; print "      {"; print "        \"ip_is_private\": true,"; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"outbound\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"port\": 853"; print "          },"; print "          {"; print "            \"network\": \"udp\","; print "            \"port\": 443"; print "          },"; print "          {"; print "            \"protocol\": \"stun\""; print "          }"; print "        ],"; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": ["; print "          \"geoip-cn\","; print "          \"geosite-geolocation-cn\""; print "        ],"; print "        \"outbound\": \"direct-out\""; print "      }"; print "    ],"; print "    \"auto_detect_interface\": true"; print "  },"; print "  \"inbounds\": ["; print "    {"; print "      \"type\": \"mixed\","; print "      \"tag\": \"mixed-in\","; print "      \"listen\": \"::\","; print "      \"listen_port\": 1080,"; print "      \"sniff\": true,"; print "      \"set_system_proxy\": false"; print "    }"; print "  ],"; print "  \"outbounds\": ["; print "    {"; print "      \"type\": \"urltest\","; print "      \"tag\": \"auto\","; print "      \"outbounds\": ["; print "      ],"; print "      \"url\": \"https://www.gstatic.com/generate_204\","; print "      \"interval\": \"1m\","; print "      \"tolerance\": 50,"; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"selector\","; print "      \"tag\": \"select\","; print "      \"outbounds\": ["; print "        \"auto\""; print "      ],"; print "      \"default\": \"auto\","; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"direct\","; print "      \"tag\": \"direct-out\""; print "    },"; print "    {"; print "      \"type\": \"block\","; print "      \"tag\": \"block\""; print "    },"; print "    {"; print "      \"type\": \"dns\","; print "      \"tag\": \"dns-out\""; print "    }"; print "  ],"; print "  \"experimental\": {"; print "    \"cache_file\": {"; print "      \"enabled\": true,"; print "      \"store_rdrc\": true"; print "    },"; print "    \"clash_api\": {"; print "      \"default_mode\": \"Rule\""; print "    }"; print "  }"; print "}" }' > "${win_client}"
+        awk 'BEGIN { print "{"; print "  \"log\": {"; print "    \"disabled\": false,"; print "    \"level\": \"warn\","; print "    \"timestamp\": true"; print "  },"; print "  \"dns\": {"; print "    \"servers\": ["; print "      {"; print "        \"tag\": \"dns_proxy\","; print "        \"address\": \"https://1.1.1.1/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"\""; print "      },"; print "      {"; print "        \"tag\": \"dns_direct\","; print "        \"address\": \"https://120.53.53.53/dns-query\","; print "        \"address_resolver\": \"dns_local\","; print "        \"strategy\": \"ipv4_only\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_local\","; print "        \"address\": \"223.5.5.5\","; print "        \"detour\": \"direct-out\""; print "      },"; print "      {"; print "        \"tag\": \"dns_block\","; print "        \"address\": \"rcode://success\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"outbound\": \"any\","; print "        \"server\": \"dns_local\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"server\": \"dns_proxy\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"server\": \"dns_block\","; print "        \"disable_cache\": true"; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-geolocation-cn\","; print "        \"server\": \"dns_direct\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"and\","; print "        \"rules\": ["; print "          {"; print "            \"rule_set\": \"geosite-geolocation-!cn\","; print "            \"invert\": true"; print "          },"; print "          {"; print "            \"rule_set\": \"geoip-cn\""; print "          }"; print "        ],"; print "        \"server\": \"dns_proxy\","; print "        \"client_subnet\": \"114.114.114.114/24\""; print "      }"; print "    ],"; print "    \"final\": \"dns_proxy\","; print "    \"strategy\": \"ipv4_only\","; print "    \"independent_cache\": true"; print "  },"; print "  \"route\": {"; print "    \"rule_set\": ["; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-category-ads-all\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-cn.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geosite-geolocation-!cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs\","; print "        \"download_detour\": \"\""; print "      },"; print "      {"; print "        \"type\": \"remote\","; print "        \"tag\": \"geoip-cn\","; print "        \"format\": \"binary\","; print "        \"url\": \"https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs\","; print "        \"download_detour\": \"\""; print "      }"; print "    ],"; print "    \"rules\": ["; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"protocol\": \"dns\""; print "          },"; print "          {"; print "            \"port\": 53"; print "          }"; print "        ],"; print "        \"outbound\": \"dns-out\""; print "      },"; print "      {"; print "        \"ip_is_private\": true,"; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Direct\","; print "        \"outbound\": \"direct-out\""; print "      },"; print "      {"; print "        \"clash_mode\": \"Global\","; print "        \"outbound\": \"select\""; print "      },"; print "      {"; print "        \"type\": \"logical\","; print "        \"mode\": \"or\","; print "        \"rules\": ["; print "          {"; print "            \"port\": 853"; print "          },"; print "          {"; print "            \"network\": \"udp\","; print "            \"port\": 443"; print "          },"; print "          {"; print "            \"protocol\": \"stun\""; print "          }"; print "        ],"; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": \"geosite-category-ads-all\","; print "        \"outbound\": \"block\""; print "      },"; print "      {"; print "        \"rule_set\": ["; print "          \"geoip-cn\","; print "          \"geosite-geolocation-cn\""; print "        ],"; print "        \"outbound\": \"direct-out\""; print "      }"; print "    ],"; print "    \"auto_detect_interface\": true"; print "  },"; print "  \"inbounds\": ["; print "    {"; print "      \"type\": \"mixed\","; print "      \"tag\": \"mixed-in\","; print "      \"listen\": \"::\","; print "      \"listen_port\": 1080,"; print "      \"sniff\": true,"; print "      \"set_system_proxy\": false"; print "    }"; print "  ],"; print "  \"outbounds\": ["; print "    {"; print "      \"type\": \"urltest\","; print "      \"tag\": \"auto\","; print "      \"outbounds\": ["; print "      ],"; print "      \"url\": \"https://www.gstatic.com/generate_204\","; print "      \"interval\": \"1m\","; print "      \"tolerance\": 50,"; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"selector\","; print "      \"tag\": \"select\","; print "      \"outbounds\": ["; print "        \"auto\""; print "      ],"; print "      \"default\": \"\","; print "      \"interrupt_exist_connections\": false"; print "    },"; print "    {"; print "      \"type\": \"direct\","; print "      \"tag\": \"direct-out\""; print "    },"; print "    {"; print "      \"type\": \"block\","; print "      \"tag\": \"block\""; print "    },"; print "    {"; print "      \"type\": \"dns\","; print "      \"tag\": \"dns-out\""; print "    }"; print "  ],"; print "  \"experimental\": {"; print "    \"cache_file\": {"; print "      \"enabled\": true,"; print "      \"store_rdrc\": true"; print "    },"; print "    \"clash_api\": {"; print "      \"default_mode\": \"Rule\""; print "    }"; print "  }"; print "}" }' > "${win_client}"
     fi
+}
+
+# 更新客户端配置文件信息
+function update_client_file() {
+    local phone_file="/usr/local/etc/sing-box/phone_client.json"
+    local win_file="/usr/local/etc/sing-box/win_client.json"
+    local phone_tag_value=$(jq -r '.outbounds[0].tag' "$phone_file")
+    local win_tag_value=$(jq -r '.outbounds[0].tag' "$win_file")
+
+    awk -v tag="$phone_tag_value" '{if ($0 ~ /"dns": {/) dns_section=1; if (dns_section && $0 ~ /"detour":/) {sub(/"detour": "[^"]*"/, "\"detour\": \"" tag "\""); dns_section=0} if ($0 ~ /"route": {/) route_section=1; if (route_section && $0 ~ /"download_detour":/) {sub(/"download_detour": "[^"]*"/, "\"download_detour\": \"" tag "\"")} if ($0 ~ /"outbounds": \[/) outbounds_section=1; if (outbounds_section && $0 ~ /"default": /) {sub(/"default": "[^"]*"/, "\"default\": \"" tag "\"")} print}' "$phone_file" > tmp.json && mv tmp.json "$phone_file"
+
+    awk -v tag="$win_tag_value" '{if ($0 ~ /"dns": {/) dns_section=1; if (dns_section && $0 ~ /"detour":/) {sub(/"detour": "[^"]*"/, "\"detour\": \"" tag "\""); dns_section=0} if ($0 ~ /"route": {/) route_section=1; if (route_section && $0 ~ /"download_detour":/) {sub(/"download_detour": "[^"]*"/, "\"download_detour\": \"" tag "\"")} if ($0 ~ /"outbounds": \[/) outbounds_section=1; if (outbounds_section && $0 ~ /"default": /) {sub(/"default": "[^"]*"/, "\"default\": \"" tag "\"")} print}' "$win_file" > tmp.json && mv tmp.json "$win_file"
 }
 
 # 生成 clash 配置信息
@@ -2904,7 +2916,7 @@ function write_clash_yaml() {
     fi
 }
 
-# 生成 NaiveProxy Windows 客户端配置信息
+# 生成 NaiveProxy 客户端配置信息
 function write_naive_client_file() {
     local naive_client_file="$naive_client_filename"
 
@@ -4114,7 +4126,7 @@ function generate_naive_win_client_config() {
     echo "电脑端配置文件已保存至$naive_client_file，请下载后使用！"
 }
 
-# 提取节点配置中的协议类型和标签
+# 提取节点配置中的协议类型和标签，并进行过滤和显示
 function extract_types_tags() {
     local config_file="/usr/local/etc/sing-box/config.json"
     filtered_tags=()
@@ -4262,7 +4274,8 @@ function delete_choice() {
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$win_client_file"
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$phone_client_file"
     fi
-
+    
+    update_client_file
     systemctl restart sing-box
     echo "已删除 $selected_type 的配置信息，服务端及客户端配置信息已更新，请下载新的配置文件使用！"
 }
@@ -4908,6 +4921,7 @@ function display_reality_config_info() {
     echo "配置信息已保存至 $output_file"
 }
 
+
 # 生成 VLESS 客户端配置文件
 function display_reality_config_files() {
     local config_file="/usr/local/etc/sing-box/config.json"
@@ -5043,6 +5057,7 @@ function display_vmess_config_info() {
     echo "" >> "$output_file"
     echo "配置信息已保存至 $output_file"
 }
+
 
 # 生成 VMess 客户端配置文件
 function display_vmess_config_files() {
@@ -5319,7 +5334,7 @@ function uninstall_sing_box() {
     echo "sing-box 卸载完成。"
 }
 
-# 卸载 Juicity
+# 卸载 juicity
 function uninstall_juicity() {
     echo "开始卸载 juicity..."
     systemctl stop juicity.service
@@ -5434,6 +5449,7 @@ function Shadowsocks_install() {
     get_local_ip
     display_Shadowsocks_config_info
     display_Shadowsocks_config_files
+    update_client_file
 }
 
 # 安装 SOCKS 并配置相关服务
@@ -5452,6 +5468,7 @@ function socks_install() {
     get_local_ip
     display_socks_config_info
     display_socks_config_files
+    update_client_file
 }
 
 # 安装 NaiveProxy 并配置相关服务
@@ -5484,6 +5501,7 @@ function http_install() {
     systemctl restart sing-box
     display_http_config_info
     display_http_config_files
+    update_client_file
 }
 
 # 安装 Tuic 并配置相关服务
@@ -5501,6 +5519,7 @@ function tuic_install() {
     get_local_ip 
     display_tuic_config_info
     display_tuic_config_files
+    update_client_file
 }
 
 # 安装 Hysteria 并配置相关服务
@@ -5517,6 +5536,7 @@ function Hysteria_install() {
     systemctl restart sing-box
     display_Hysteria_config_info
     display_Hysteria_config_files
+    update_client_file
 }
 
 # 安装 ShadowTLS 并配置相关服务
@@ -5535,6 +5555,7 @@ function shadowtls_install() {
     get_local_ip    
     display_shadowtls_config_info
     display_shadowtls_config_files
+    update_client_file
 }
 
 # 安装 Reality 并配置相关服务
@@ -5553,6 +5574,7 @@ function reality_install() {
     get_local_ip    
     display_reality_config_info
     display_reality_config_files
+    update_client_file
 }
 
 # 安装 Hysteria 2 并配置相关服务
@@ -5569,6 +5591,7 @@ function Hysteria2_install() {
     systemctl restart sing-box
     display_Hy2_config_info
     display_Hy2_config_files
+    update_client_file
 }
 
 # 安装 Trojan 并配置相关服务
@@ -5585,6 +5608,7 @@ function trojan_install() {
     systemctl restart sing-box
     display_trojan_config_info
     display_trojan_config_files
+    update_client_file
 }
 
 # 安装 VMess 并配置相关服务
@@ -5602,6 +5626,7 @@ function vmess_install() {
     systemctl restart sing-box
     display_vmess_config_info
     display_vmess_config_files
+    update_client_file
 }
 
 # 安装 WireGuard 并配置相关服务
