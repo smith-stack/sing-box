@@ -17,11 +17,11 @@
 ## **安装**
 - **Debian&&Ubuntu使用以下命令安装依赖**
 ```
-apt update && apt -y install curl wget tar socat jq git openssl uuid-runtime build-essential zlib1g-dev libssl-dev libevent-dev dnsutils xxd python3
+apt update && apt -y install curl wget tar socat jq git openssl uuid-runtime build-essential zlib1g-dev libssl-dev libevent-dev dnsutils xxd python3 net-tools
 ```
 - **CentOS使用以下命令安装依赖**
 ```
-yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c++ zlib-devel openssl-devel libevent-devel bind-utils xxd python3
+yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c++ zlib-devel openssl-devel libevent-devel bind-utils xxd python3 net-tools
 ```
 - **使用以下命令运行脚本**
 ```
