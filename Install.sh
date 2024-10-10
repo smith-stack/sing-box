@@ -2902,7 +2902,6 @@ function update_client_file() {
     local win_tag_value=$(jq -r '.outbounds[0].tag' "$win_file")
 
     awk -v tag="$phone_tag_value" '{if ($0 ~ /"dns": {/) dns_section=1; if (dns_section && $0 ~ /"detour":/) {sub(/"detour": "[^"]*"/, "\"detour\": \"" tag "\""); dns_section=0} if ($0 ~ /"route": {/) route_section=1; if (route_section && $0 ~ /"download_detour":/) {sub(/"download_detour": "[^"]*"/, "\"download_detour\": \"" tag "\"")} if ($0 ~ /"outbounds": \[/) outbounds_section=1; if (outbounds_section && $0 ~ /"default": /) {sub(/"default": "[^"]*"/, "\"default\": \"" tag "\"")} print}' "$phone_file" > tmp.json && mv tmp.json "$phone_file"
-
     awk -v tag="$win_tag_value" '{if ($0 ~ /"dns": {/) dns_section=1; if (dns_section && $0 ~ /"detour":/) {sub(/"detour": "[^"]*"/, "\"detour\": \"" tag "\""); dns_section=0} if ($0 ~ /"route": {/) route_section=1; if (route_section && $0 ~ /"download_detour":/) {sub(/"download_detour": "[^"]*"/, "\"download_detour\": \"" tag "\"")} if ($0 ~ /"outbounds": \[/) outbounds_section=1; if (outbounds_section && $0 ~ /"default": /) {sub(/"default": "[^"]*"/, "\"default\": \"" tag "\"")} print}' "$win_file" > tmp.json && mv tmp.json "$win_file"
 }
 
