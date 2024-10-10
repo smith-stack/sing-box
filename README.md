@@ -74,7 +74,7 @@ wget -N -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-b
 
 ## **鸣谢**
 - **TinrLin 的脚本，作者已删库。**
-- **chise0713 的获取 Warp 账号脚本：https://github.com/chise0713/warp-reg.sh。**
+- **chise0713 的获取 Warp 账号脚本：https://github.com/chise0713/warp-reg.sh**
 
 ## **免责声明**
 - **本项目旨在维护 TinrLin 的脚本。**
