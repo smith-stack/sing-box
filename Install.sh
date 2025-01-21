@@ -5395,6 +5395,16 @@ function Update_Script() {
     chmod +x /root/singbox.sh
 }
 
+# 添加定时任务以自动更新证书
+function add_cron_job() {
+    if command -v crontab > /dev/null && crontab -l | grep -q "singbox.sh"; then
+        echo "Cron job already exists."
+    else
+        (crontab -l 2>/dev/null ; echo "0 3 * * 1 /bin/bash /root/singbox.sh 18 >> /usr/local/etc/certificate.log 2>&1") | crontab -
+        echo "Cron job added successfully."
+    fi
+}
+
 # 安装 Juicity 并配置相关服务
 function juicity_install() {
     configure_dns64
@@ -5403,6 +5413,7 @@ function juicity_install() {
     install_latest_juicity
     get_local_ip
     generate_juicity_config
+    add_cron_job
     configure_juicity_service
     systemctl daemon-reload
     systemctl enable juicity.service
@@ -5478,6 +5489,7 @@ function NaiveProxy_install() {
     enable_bbr
     log_outbound_config        
     generate_naive_config
+    add_cron_job
     modify_format_inbounds_and_outbounds  
     modify_route_rules  
     systemctl daemon-reload
@@ -5494,6 +5506,7 @@ function http_install() {
     enable_bbr
     log_outbound_config        
     generate_http_config
+    add_cron_job
     modify_format_inbounds_and_outbounds  
     modify_route_rules  
     systemctl daemon-reload
@@ -5511,6 +5524,7 @@ function tuic_install() {
     enable_bbr
     log_outbound_config    
     generate_tuic_config
+    add_cron_job
     modify_format_inbounds_and_outbounds
     modify_route_rules  
     systemctl daemon-reload
@@ -5529,6 +5543,7 @@ function Hysteria_install() {
     enable_bbr  
     log_outbound_config    
     generate_Hysteria_config
+    add_cron_job
     modify_format_inbounds_and_outbounds
     modify_route_rules 
     systemctl daemon-reload
@@ -5584,6 +5599,7 @@ function Hysteria2_install() {
     enable_bbr  
     log_outbound_config    
     generate_Hy2_config
+    add_cron_job
     modify_format_inbounds_and_outbounds
     modify_route_rules
     systemctl daemon-reload
@@ -5601,6 +5617,7 @@ function trojan_install() {
     enable_bbr 
     log_outbound_config
     generate_trojan_config
+    add_cron_job
     modify_format_inbounds_and_outbounds
     modify_route_rules
     systemctl daemon-reload      
@@ -5619,6 +5636,7 @@ function vmess_install() {
     log_outbound_config 
     get_local_ip
     generate_vmess_config
+    add_cron_job
     modify_format_inbounds_and_outbounds
     modify_route_rules
     systemctl daemon-reload   
@@ -5651,6 +5669,15 @@ function Update_certificate() {
     extract_tls_info
     validate_tls_info
     Reapply_certificates
+}
+
+function run_option() {
+    case "$1" in
+        "18")
+            Update_certificate
+            exit 0 
+            ;;
+    esac
 }
 
 # 主菜单
@@ -5772,5 +5799,11 @@ echo "╚═══════════════════════�
             ;;
     esac
 }
+
+if [ $# -eq 0 ]; then
+    main_menu
+else
+    run_option "$1"
+fi
 
 main_menu
