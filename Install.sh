@@ -1410,7 +1410,7 @@ function create_self_signed_cert() {
 
 # 获取 WARP 配置参数
 function generate_warp_info() {
-    local key priv_key pub_key temp_file ser_v4 ser_v6 ser_port local_v4 local_v6 publ_key res_value warp_output_file
+    local key priv_key pub_key temp_file ser_v4 ser_v6 ser_port local_v4 local_v6 publ_key res_value
 
     key=$(openssl genpkey -algorithm X25519 | openssl pkey -text -noout)
     priv_key=$(echo "$key" | grep -A 3 "priv:" | tail -n +2 | tr -d ' \n:' | xxd -r -p | base64)
