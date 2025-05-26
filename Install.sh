@@ -5685,7 +5685,7 @@ function main_menu() {
 echo "╔════════════════════════════════════════════════════════════════════════╗"
 echo -e "║ ${CYAN}作者${NC}： TinrLin                                                         ║"
 echo -e "║ ${CYAN}脚本快捷方式${NC}： singbox                                                 ║"
-echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/+CO3Itft343piMjFl                      ║"
+echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/+EQY_InMZ2L5lODNl                      ║"
 echo -e "║ ${CYAN}项目地址${NC}: https://github.com/smith-stack/sing-box      Version：1.5.0  ║"
 echo "╠════════════════════════════════════════════════════════════════════════╣"
 echo "║ 请选择要执行的操作：                                                   ║"
