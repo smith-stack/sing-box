@@ -1,7 +1,9 @@
 ## **更新内容**
-- **V 1.5.0**
-- **脚本适配 sing-box 1.10+。**
-- **由于sing-box大更新，请自行更新客户端到1.10.0版本，1.9.7版本的客户端和1.10.0版本的配置不兼容。**
+- **V 1.12.0 Prerelease-alpha适配sing-box1.12.0版本。**
+- **添加对AnyTLS协议的支持。**
+- **sing-box服务端及客户端配置更新。**
+- **Clash客户端DNS防泄漏配置。**
+- **V 1.12.0 Prerelease-alpha为测试版，稳定版请使用V 1.5.0。**
 
 
 ## **说明**
@@ -16,15 +18,22 @@
 - **脚本支持自定义各种配置参数；如果不懂如何配置，直接回车即可，脚本会自动随机生成配置（包括用户名、UUID、用户密码等）。**
 
 ## **安装**
-- **Debian&&Ubuntu使用以下命令安装依赖**
+### **Debian&&Ubuntu使用以下命令安装依赖**
 ```
 apt update && apt -y install curl wget tar socat jq git openssl uuid-runtime build-essential zlib1g-dev libssl-dev libevent-dev dnsutils xxd net-tools cron
 ```
-- **CentOS使用以下命令安装依赖**
+### **CentOS使用以下命令安装依赖**
 ```
 yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c++ zlib-devel openssl-devel libevent-devel bind-utils xxd net-tools cronie
 ```
-- **使用以下命令运行脚本**
+### **使用以下命令运行脚本**
+
+- **V1.5.0 请使用以下命令运行脚本**
+```
+wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Install.sh && chmod +x /usr/local/bin/singbox.sh && ln -sf /usr/local/bin/singbox.sh /usr/local/bin/singbox && bash /usr/local/bin/singbox.sh
+```
+
+- **V1.12.0 Prerelease-alpha 请使用以下命令运行脚本**
 ```
 wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Install.sh && chmod +x /usr/local/bin/singbox.sh && ln -sf /usr/local/bin/singbox.sh /usr/local/bin/singbox && bash /usr/local/bin/singbox.sh
 ```
