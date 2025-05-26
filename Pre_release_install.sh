@@ -325,13 +325,13 @@ function enable_bbr() {
 # 选择sing-box的安装方式
 function select_sing_box_install_option() {
     while true; do
-        echo "请选择 sing-box 的安装方式（默认1）："
+        echo "请选择 sing-box 的安装方式（默认2）："
         echo "1). 下载安装 sing-box（Latest 版本）"
         echo "2). 下载安装 sing-box（Beta 版本）"
         echo "3). 编译安装 sing-box（完整功能版本）"
         
         read -p "请选择 [1-3]: " install_option
-        install_option="${install_option:-1}"
+        install_option="${install_option:-2}"
 
         case $install_option in
             1)
@@ -4343,7 +4343,7 @@ function delete_choice() {
 
     # 检查配置文件中的某些字段是否需要处理
     if ! jq -e 'select(.inbounds[] | .listen == "::")' "$config_file" > /dev/null; then
-        sed -i 's/"rules": \[\]/"rules": [\n    ]/' "$config_file"
+        sed -i 's/^        "inbounds": \[\],/  "inbounds": [\n  ],/' "$config_file"
         sed -i 's/^  "inbounds": \[\],/  "inbounds": [\n  ],/' "$config_file"
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$win_client_file"
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$phone_client_file"
