@@ -4343,7 +4343,7 @@ function delete_choice() {
 
     # 检查配置文件中的某些字段是否需要处理
     if ! jq -e 'select(.inbounds[] | .listen == "::")' "$config_file" > /dev/null; then
-        sed -i 's/^        "inbounds": \[\],/  "inbounds": [\n        ],/' "$config_file"
+        sed -i 's/^        "inbound": \[\],/  "inbound": [\n        ],/' "$config_file"
         sed -i 's/^  "inbounds": \[\],/  "inbounds": [\n  ],/' "$config_file"
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$win_client_file"
         sed -i 's/^      "outbounds": \[\],/      "outbounds": [\n      ],/' "$phone_client_file"
