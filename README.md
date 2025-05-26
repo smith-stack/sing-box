@@ -35,7 +35,7 @@ wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-sta
 
 - **V1.12.0 Prerelease-alpha 请使用以下命令运行脚本**
 ```
-wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Install.sh && chmod +x /usr/local/bin/singbox.sh && ln -sf /usr/local/bin/singbox.sh /usr/local/bin/singbox && bash /usr/local/bin/singbox.sh
+wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Pre_release_install.sh && chmod +x /usr/local/bin/singbox.sh && ln -sf /usr/local/bin/singbox.sh /usr/local/bin/singbox && bash /usr/local/bin/singbox.sh
 ```
 
 ## **使用方法**
