@@ -5391,7 +5391,7 @@ function check_wireguard_config() {
 
 # 更新安装脚本
 function Update_Script() {
-    wget -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Pre_release_install.sh
+    wget -O /root/singbox.sh https://raw.githubusercontent.com/smith-stack/sing-box/refs/heads/main/Install.sh
     chmod +x /root/singbox.sh
 }
 
