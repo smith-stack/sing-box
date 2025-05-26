@@ -47,9 +47,10 @@ wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-sta
 ## **脚本支持的节点类型**
 - **SOCKS**
 - **HTTP**
+- **AnyTLS**
 - **TUIC V5**
 - **Juicity**
-- **WireGuard--解锁 ChatGPT、Netflix、Disney+**
+- **WireGuard**
 - **Hysteria2**
 - **VLESS+TCP**
 - **VLESS+WebSocket**
@@ -58,7 +59,7 @@ wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/smith-sta
 - **VLESS+Vision+REALITY**
 - **VLESS+H2C+REALITY**
 - **VLESS+gRPC+REALITY**
-- **Direct--sing-box版任意门**
+- **Direct**
 - **Trojan+TCP**
 - **Trojan+WebSocket**
 - **Trojan+gRPC**
