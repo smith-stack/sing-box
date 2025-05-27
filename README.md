@@ -25,7 +25,7 @@
 ```
 apt update && apt -y install curl wget tar socat jq git openssl uuid-runtime build-essential zlib1g-dev libssl-dev libevent-dev dnsutils xxd net-tools cron
 ```
-### **CentOS使用以下命令安装依赖**
+### **Rocky&&CentOS使用以下命令安装依赖**
 ```
 yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c++ zlib-devel openssl-devel libevent-devel bind-utils xxd net-tools cronie
 ```
