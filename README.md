@@ -14,6 +14,7 @@
 - **脚本支持所有协议共存。**
 - **脚本支持端口跳跃。**
 - **脚本支持自签100年证书。**
+- **脚本支持自动续签证书。**
 - **脚本支持HTTP、WebSocket、gRPC、HTTPUpgrade传输协议。**
 - **脚本支持 Multiplex、TCP Brutal、ECH 配置；若要启用 Multiplex、TCP Brutal，sing-box 内核需 ≥1.7.0，请在服务端自行安装 TCP Brutal。**
 - **脚本支持自定义各种配置参数；如果不懂如何配置，直接回车即可，脚本会自动随机生成配置（包括用户名、UUID、用户密码等）。**
