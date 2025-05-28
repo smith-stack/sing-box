@@ -9,6 +9,8 @@ disable_option=false
 enable_ech=false
 listen_port=""
 override_port=""
+start_port=""
+end_port=""
 ip_v4=""
 ip_v6=""
 record_content=""
@@ -1438,6 +1440,98 @@ function generate_warp_info() {
     rm "$temp_file"
 }
 
+# 检测并安装 iptables 及相关服务
+function check_iptables_installed() {
+    local os_name=$(uname -s)
+    export PATH=$PATH:/usr/sbin:/sbin
+
+    if [[ "$os_name" == "Linux" ]]; then
+        if [ -f /etc/debian_version ]; then
+            if ! command -v iptables &> /dev/null; then
+                DEBIAN_FRONTEND=noninteractive apt-get install -y iptables netfilter-persistent iptables-persistent &> /dev/null
+            fi
+            netfilter-persistent save &> /dev/null
+
+        elif [ -f /etc/redhat-release ]; then
+            if ! command -v iptables &> /dev/null; then
+                yum install -y iptables-services &> /dev/null
+            fi
+            service iptables save &> /dev/null
+            service ip6tables save &> /dev/null
+            systemctl enable iptables &> /dev/null
+            systemctl enable ip6tables &> /dev/null
+        fi
+
+        sed -i '/^net.ipv4.ip_forward/d' /etc/sysctl.conf
+        sed -i '/^net.ipv6.conf.all.forwarding/d' /etc/sysctl.conf
+        echo -e "net.ipv4.ip_forward = 1\nnet.ipv6.conf.all.forwarding = 1" >> /etc/sysctl.conf
+        sysctl -p &> /dev/null
+    fi
+}
+
+# 设置端口范围
+function get_port_range() {
+    while true; do
+        read -p "请输入端口跳跃的起始端口 (默认：20000): " start_port
+        start_port=${start_port:-20000}
+
+        if [[ $start_port =~ ^[1-9][0-9]{0,4}$ && $start_port -le 65535 ]]; then
+            break
+        else
+            echo -e "${RED}错误：端口范围 1-65535，请重新输入！${NC}" >&2
+        fi
+    done
+
+    while true; do
+        read -p "请输入端口跳跃的终止端口 (默认：50000): " end_port
+        end_port=${end_port:-50000}
+
+        if [[ $end_port =~ ^[1-9][0-9]{0,4}$ && $end_port -le 65535 ]]; then
+            if [ "$end_port" -le "$start_port" ]; then
+                echo -e "${RED}错误：终止端口必须大于起始端口！${NC}" >&2
+                return 1
+            fi
+            break
+        else
+            echo -e "${RED}错误：端口范围 1-65535，请重新输入！${NC}" >&2
+        fi
+    done
+}
+
+# 是否开启端口跳跃
+function ask_enable_port_forwarding() {
+    while true; do
+        read -p "是否开启端口跳跃功能？(Y/N，默认为Y): " choice
+
+        if [[ -z "$choice" || "$choice" == "y" || "$choice" == "Y" ]]; then
+            check_iptables_installed
+            get_port_range
+            set_port_forwarding
+            break
+        elif [[ "$choice" == "n" || "$choice" == "N" ]]; then
+            break
+        else
+            echo -e "${RED}无效的输入，请重新输入！${NC}"
+        fi
+    done
+}
+
+# 设置 iptables DNAT 规则
+function set_port_forwarding() {
+    echo "Setting port forwarding from $start_port:$end_port to $listen_port..."
+    iptables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$listen_port &> /dev/null
+    iptables -t nat -A POSTROUTING -p udp --dport $listen_port -j MASQUERADE &> /dev/null
+
+    ip6tables -t nat -A PREROUTING -i eth0 -p udp --dport $start_port:$end_port -j DNAT --to-destination :$listen_port &> /dev/null
+    ip6tables -t nat -A POSTROUTING -p udp --dport $listen_port -j MASQUERADE &> /dev/null
+
+    if [ -f /etc/debian_version ]; then
+        netfilter-persistent save &> /dev/null
+    elif [ -f /etc/redhat-release ]; then
+        service iptables save &> /dev/null
+        service ip6tables save &> /dev/null
+    fi
+}
 
 # 选择加密类型
 function select_encryption_method() {
@@ -2397,7 +2491,6 @@ function extract_variables_and_cleanup() {
     peer_public_key=$(jq -r '.public_key' "$warp_output_file")
     reserved=$(jq -r '.reserved | tostring | gsub(","; ", ")' "$warp_output_file")
     mtu=$(jq -r '.mtu' "$warp_output_file")
-
     rm "$warp_output_file"
 }
 
@@ -2627,6 +2720,7 @@ function generate_Hysteria_config() {
     configure_obfuscation
     get_local_ip
     set_ech_config
+    ask_enable_port_forwarding
     select_certificate_option
     local cert_path="$certificate_path"
     local key_path="$private_key_path"
@@ -2725,6 +2819,7 @@ function generate_Hy2_config() {
     set_fake_domain
     get_local_ip
     set_ech_config
+    ask_enable_port_forwarding
     select_certificate_option
     local cert_path="$certificate_path"
     local key_path="$private_key_path"
@@ -3129,6 +3224,12 @@ function generate_Hysteria_win_client_config() {
         ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
+    if [ -z "$start_port" ] || [ -z "$end_port" ]; then
+        server_ports_config="\"server_port\": $listen_port"
+    else
+        server_ports_config="\"server_ports\": [\n        \"$start_port:$end_port\"\n      ]"
+    fi
+
     while true; do
         proxy_name="Hysteria-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$win_client_file"; then
@@ -3136,8 +3237,8 @@ function generate_Hysteria_win_client_config() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
-    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      \"server_port\": " listen_port ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"auth_str\": \""user_password"\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v server_ports_config="$server_ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
+    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      " server_ports_config ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"auth_str\": \""user_password"\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
     /^      "outbounds": \[/ {print; getline; if ($0 ~ /^      \],$/) {print "        \"" proxy_name "\""} else {print "        \"" proxy_name "\", "} }    
     {print}' "$win_client_file" > "$win_client_file.tmp"
 
@@ -3169,6 +3270,12 @@ function generate_Hysteria_phone_client_config() {
         ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
+    if [ -z "$start_port" ] || [ -z "$end_port" ]; then
+        server_ports_config="\"server_port\": $listen_port"
+    else
+        server_ports_config="\"server_ports\": [\n        \"$start_port:$end_port\"\n      ]"
+    fi
+
     while true; do
         proxy_name="Hysteria-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$phone_client_file"; then
@@ -3176,8 +3283,8 @@ function generate_Hysteria_phone_client_config() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
-    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      \"server_port\": " listen_port ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"auth_str\": \""user_password"\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v server_ports_config="$server_ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
+    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      " server_ports_config ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"auth_str\": \""user_password"\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
     /^      "outbounds": \[/ {print; getline; if ($0 ~ /^      \],$/) {print "        \"" proxy_name "\""} else {print "        \"" proxy_name "\", "} }    
     {print}' "$phone_client_file" > "$phone_client_file.tmp"
 
@@ -3206,6 +3313,13 @@ function generate_Hysteria_yaml() {
     obfs: $obfs_password"
     fi
 
+    if [ -n "$start_port" ] && [ -n "$end_port" ]; then
+        ports_config="
+    ports: $start_port-$end_port"
+    else
+        ports_config=""
+    fi
+
     while true; do
         proxy_name="hysteria-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$filename"; then
@@ -3213,7 +3327,7 @@ function generate_Hysteria_yaml() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v user_password="$user_password" -v obfs_config="$obfs_config" -v tls_insecure="$tls_insecure" '/^proxies:$/ {print; print "  - name: " proxy_name; print "    type: hysteria"; print "    server:", server_value; print "    port:", listen_port; print "    auth-str:", user_password obfs_config; print "    sni:", server_name; print "    skip-cert-verify:", tls_insecure; print "    alpn:"; print "      - h3"; print "    protocol: udp"; print "    up: \"" down_mbps " Mbps\""; print "    down: \"" up_mbps " Mbps\""; print ""; next} /- name: Proxy/ { print; flag_proxy=1; next } flag_proxy && flag_proxy++ == 3 { print "      - " proxy_name } /- name: auto/ { print; flag_auto=1; next } flag_auto && flag_auto++ == 3 { print "      - " proxy_name } 1' "$filename" > temp_file && mv temp_file "$filename"
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v ports_config="$ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v user_password="$user_password" -v obfs_config="$obfs_config" -v tls_insecure="$tls_insecure" '/^proxies:$/ {print; print "  - name: " proxy_name; print "    type: hysteria"; print "    server:", server_value; print "    port:", listen_port ports_config; print "    auth-str:", user_password obfs_config; print "    sni:", server_name; print "    skip-cert-verify:", tls_insecure; print "    alpn:"; print "      - h3"; print "    protocol: udp"; print "    up: \"" down_mbps " Mbps\""; print "    down: \"" up_mbps " Mbps\""; print ""; next} /- name: Proxy/ { print; flag_proxy=1; next } flag_proxy && flag_proxy++ == 3 { print "      - " proxy_name } /- name: auto/ { print; flag_auto=1; next } flag_auto && flag_auto++ == 3 { print "      - " proxy_name } 1' "$filename" > temp_file && mv temp_file "$filename"
 }
 
 # 生成 VMess Windows 客户端配置
@@ -3669,6 +3783,12 @@ function generate_Hysteria2_phone_client_config() {
         ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
+    if [ -z "$start_port" ] || [ -z "$end_port" ]; then
+        server_ports_config="\"server_port\": $listen_port"
+    else
+        server_ports_config="\"server_ports\": [\n        \"$start_port:$end_port\"\n      ]"
+    fi
+
     while true; do
         proxy_name="Hysteria2-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$phone_client_file"; then
@@ -3676,8 +3796,8 @@ function generate_Hysteria2_phone_client_config() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
-    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria2\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      \"server_port\": " listen_port ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"password\": \"" user_password "\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v server_ports_config="$server_ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
+    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria2\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      " server_ports_config ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"password\": \"" user_password "\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
    /^      "outbounds": \[/ {print; getline; if ($0 ~ /^      \],$/) {print "        \"" proxy_name "\""} else {print "        \"" proxy_name "\", "} }    
     {print}' "$phone_client_file" > "$phone_client_file.tmp"
 
@@ -3709,6 +3829,12 @@ function generate_Hysteria2_win_client_config() {
         ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
+    if [ -z "$start_port" ] || [ -z "$end_port" ]; then
+        server_ports_config="\"server_port\": $listen_port"
+    else
+        server_ports_config="\"server_ports\": [\n        \"$start_port:$end_port\"\n      ]"
+    fi
+
     while true; do
         proxy_name="Hysteria2-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$win_client_file"; then
@@ -3716,8 +3842,8 @@ function generate_Hysteria2_win_client_config() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
-    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria2\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      \"server_port\": " listen_port ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"password\": \"" user_password "\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v server_ports_config="$server_ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v obfs_config="$obfs_config" -v user_password="$user_password" -v tls_insecure="$tls_insecure" -v ech_client_config="$ech_client_config" '
+    /^  "outbounds": \[/ {print; getline; print "    {"; print "      \"type\": \"hysteria2\","; print "      \"tag\": \"" proxy_name "\","; print "      \"server\": \"" server_value "\", "; print "      " server_ports_config ","; print "      \"up_mbps\": " down_mbps ", "; print "      \"down_mbps\": " up_mbps ","obfs_config""; print "      \"password\": \"" user_password "\","; print "      \"tls\": {"; print "        \"enabled\": true,"; print "        \"insecure\": " tls_insecure ","; print "        \"server_name\": \"" server_name "\", "; print "        \"alpn\": ["; print "          \"h3\""; print "        ]" ech_client_config ""; print "      }"; print "    },";} 
     /^      "outbounds": \[/ {print; getline; if ($0 ~ /^      \],$/) {print "        \"" proxy_name "\""} else {print "        \"" proxy_name "\", "} }    
     {print}' "$win_client_file" > "$win_client_file.tmp"
 
@@ -3747,6 +3873,13 @@ function generate_Hysteria2_yaml() {
     obfs-password: $obfs_password"
     fi
 
+    if [ -n "$start_port" ] && [ -n "$end_port" ]; then
+        ports_config="
+    ports: $start_port-$end_port"
+    else
+        ports_config=""
+    fi
+
     while true; do
         proxy_name="hysteria2-$(head /dev/urandom | tr -dc '0-9' | head -c 4)"
         if ! grep -q "name: $proxy_name" "$filename"; then
@@ -3754,7 +3887,7 @@ function generate_Hysteria2_yaml() {
         fi
     done
 
-    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v user_password="$user_password" -v obfs_config="$obfs_config" -v tls_insecure="$tls_insecure" '/^proxies:$/ {print; print "  - name: " proxy_name; print "    type: hysteria2"; print "    server:", server_value; print "    port:", listen_port; print "    password:", user_password obfs_config; print "    alpn:"; print "      - h3"; print "    sni:", server_name; print "    skip-cert-verify:", tls_insecure; print "    up: \"" down_mbps " Mbps\""; print "    down: \"" up_mbps " Mbps\""; print ""; next} /- name: Proxy/ { print; flag_proxy=1; next } flag_proxy && flag_proxy++ == 3 { print "      - " proxy_name } /- name: auto/ { print; flag_auto=1; next } flag_auto && flag_auto++ == 3 { print "      - " proxy_name } 1' "$filename" > temp_file && mv temp_file "$filename"
+    awk -v proxy_name="$proxy_name" -v server_value="$server_value" -v server_name="$server_name" -v listen_port="$listen_port" -v ports_config="$ports_config" -v up_mbps="$up_mbps" -v down_mbps="$down_mbps" -v user_password="$user_password" -v obfs_config="$obfs_config" -v tls_insecure="$tls_insecure" '/^proxies:$/ {print; print "  - name: " proxy_name; print "    type: hysteria2"; print "    server:", server_value; print "    port:", listen_port ports_config; print "    password:", user_password obfs_config; print "    alpn:"; print "      - h3"; print "    sni:", server_name; print "    skip-cert-verify:", tls_insecure; print "    up: \"" down_mbps " Mbps\""; print "    down: \"" up_mbps " Mbps\""; print ""; next} /- name: Proxy/ { print; flag_proxy=1; next } flag_proxy && flag_proxy++ == 3 { print "      - " proxy_name } /- name: auto/ { print; flag_auto=1; next } flag_auto && flag_auto++ == 3 { print "      - " proxy_name } 1' "$filename" > temp_file && mv temp_file "$filename"
 }
 
 # 生成 VLESS Windows 客户端配置
@@ -4164,7 +4297,7 @@ function generate_naive_win_client_config() {
     echo "电脑端配置文件已保存至$naive_client_file，请下载后使用！"
 }
 
-# 提取节点配置中的协议类型和标签，并进行过滤和显示
+# 提取节点配置中的协议类型和标签
 function extract_types_tags() {
     local config_file="/usr/local/etc/sing-box/config.json"
     filtered_tags=()
@@ -4172,7 +4305,7 @@ function extract_types_tags() {
 
     tags=($(jq -r '.inbounds[] | select(.tag != null) | .tag' "$config_file"))
     detour_tag=$(jq -r '.inbounds[] | select(.type == "shadowtls") | .detour' "$config_file")
-    wireguard_type=$(jq -r '.endpoints[] | select(.type == "wireguard") | .type' "$config_file")
+    wireguard_type=$(jq -r '(.endpoints // []) | map(select(.type == "wireguard") | .type)[]?' "$config_file")
 
     if [ -z "$tags" ] && [ -z "$wireguard_type" ]; then
         echo "未检测到节点配置，请搭建节点后再使用本选项！"
@@ -4206,21 +4339,9 @@ function extract_types_tags() {
     fi
 }
 
-# 删除指定节点的配置信息，并更新相关客户端配置文件
-function delete_choice() {
-    local config_file="/usr/local/etc/sing-box/config.json"
-    local phone_client_file="/usr/local/etc/sing-box/phone_client.json"
-    local win_client_file="/usr/local/etc/sing-box/win_client.json"
-    local clash_yaml="/usr/local/etc/sing-box/clash.yaml"
-    local output_file="/usr/local/etc/sing-box/output.txt"
-    local temp_json="/usr/local/etc/sing-box/temp.json"
-    local temp_yaml="/usr/local/etc/sing-box/temp.yaml"
-
-    # 提取节点类型和标签
-    extract_types_tags
+# 选择要删除的节点
+function select_node_choice() {
     valid_choice=false
-
-   # 验证用户选择的节点
     while [ "$valid_choice" == false ]; do
         read -p "请选择要删除的节点配置（输入对应的数字）: " choice
         echo "你选择了: $choice"
@@ -4230,31 +4351,26 @@ function delete_choice() {
             valid_choice=true
         fi
     done
-
     selected_tag="${filtered_tags[$choice-1]}"
     selected_type="${types[$choice-1]}"
-
-    # 提取监听端口
     listen_port=$(jq -r --arg selected_tag "$selected_tag" '.inbounds[] | select(.tag == $selected_tag) | .listen_port' "$config_file" | awk '{print int($0)}')
+}
 
+# 删除 sing-box 配置文件中相关配置
+function process_config_deletion() {
     if [ "$selected_type" == "wireguard" ]; then
-        # 删除 Wireguard 相关配置
-        jq 'del(.endpoints)' "$config_file" > "$temp_json"
-        mv "$temp_json" "$config_file"
-        jq '.route.rules |= map(select(.outbound != "wg-ep"))' "$config_file" > "$temp_json"
-        mv "$temp_json" "$config_file"
-        jq 'del(.route.rule_set)' "$config_file" > "$temp_json"
-        mv "$temp_json" "$config_file"
+        jq 'del(.endpoints)' "$config_file" > "$temp_json" && mv "$temp_json" "$config_file"
+        jq '.route.rules |= map(select(.outbound != "wg-ep"))' "$config_file" > "$temp_json" && mv "$temp_json" "$config_file"
+        jq 'del(.route.rule_set)' "$config_file" > "$temp_json" && mv "$temp_json" "$config_file"
     else
-        # 删除非 Wireguard 配置
         detour_tag=$(jq -r --arg selected_tag "$selected_tag" '.inbounds[] | select(.type == "shadowtls" and .tag == $selected_tag) | .detour' "$config_file")
-        jq --arg selected_tag "$selected_tag" --arg detour_tag "$detour_tag" '.inbounds |= map(select(.tag != $selected_tag and .tag != $detour_tag))' "$config_file" > "$temp_json"
-        mv "$temp_json" "$config_file"
-        jq --arg selected_tag "$selected_tag" '.route.rules |= map(.inbound |= map(select(. != $selected_tag)))' "$config_file" > "$temp_json"
-        mv "$temp_json" "$config_file"
+        jq --arg selected_tag "$selected_tag" --arg detour_tag "$detour_tag" '.inbounds |= map(select(.tag != $selected_tag and .tag != $detour_tag))' "$config_file" > "$temp_json" && mv "$temp_json" "$config_file"
+        jq --arg selected_tag "$selected_tag" '.route.rules |= map(.inbound |= map(select(. != $selected_tag)))' "$config_file" > "$temp_json" && mv "$temp_json" "$config_file"
     fi
+}
 
-    # 删除 output_file 中与端口相关的条目
+# 删除 output 中对应端口的条目
+function process_output_file_deletion() {
     if [ "$selected_type" != "wireguard" ]; then
         awk -v port="$listen_port" '$0 ~ "监听端口: " port {print; in_block=1; next} in_block && NF == 0 {in_block=0} !in_block' "$output_file" > "$output_file.tmp1"
         mv "$output_file.tmp1" "$output_file"
@@ -4262,66 +4378,103 @@ function delete_choice() {
         mv "$output_file.tmp2" "$output_file"
         sed -i '/./,$!d' "$output_file"
     fi
+}
 
-    # 处理 Clash YAML 文件中的匹配项
+# 提取 Clash 配置相关标签
+function process_clash_yaml_deletion() {
     if [ -f "$clash_yaml" ]; then
-        get_clash_tags=$(awk '/proxies:/ {in_proxies_block=1} in_proxies_block && /- name:/ {name = $3} in_proxies_block && /port:/ {port = $2; print "Name:", name, "Port:", port}' "$clash_yaml" > "$temp_yaml")
+        awk '/proxies:/ {in_proxies_block=1} in_proxies_block && /- name:/ {name = $3} in_proxies_block && /port:/ {port = $2; print "Name:", name, "Port:", port}' "$clash_yaml" > "$temp_yaml"
         matching_clash_tag=$(grep "Port: $listen_port" "$temp_yaml" | awk '{print $2}')
     fi
+}
 
-    # 提取匹配的标签值
-    if [ -n "$listen_port" ]; then
-        # 提取 phone_client_file 中所有匹配的标签
-        phone_matching_tags=$(jq -r --argjson listen_port "$listen_port" '.outbounds[] | select(.server_port == $listen_port) | .tag' "$phone_client_file")
-        # 提取 win_client_file 中所有匹配的标签
-        win_matching_tags=$(jq -r --argjson listen_port "$listen_port" '.outbounds[] | select(.server_port == $listen_port) | .tag' "$win_client_file")
+# 检查防火墙端口转发规则
+function process_firewall_rules_deletion() {
+    for table in iptables ip6tables; do
+        if command -v $table &> /dev/null; then
+            while read -r line; do
+                if [[ "$line" =~ (tcp|udp)[[:space:]]+dpts?:([0-9]+):([0-9]+)[^[:alnum:]]+to::([0-9]+) ]]; then
+                    protocol="${BASH_REMATCH[1]}"
+                    d_start="${BASH_REMATCH[2]}"
+                    d_end="${BASH_REMATCH[3]}"
+                    d_target="${BASH_REMATCH[4]}"
+                    if [[ "$d_target" == "$listen_port" ]]; then
+                        start_port="$d_start"
+                        end_port="$d_end"
+                        break 2
+                    fi
+                fi
+            done < <($table -t nat -nL PREROUTING)
+        fi
+    done
+}
+
+# 提取客户端要删除的标签
+function process_client_files_deletion() {
+    if [ -f "$phone_client_file" ] && [ -f "$win_client_file" ]; then
+        if [ -n "$listen_port" ]; then
+            if [[ -n "$start_port" && -n "$end_port" ]]; then
+                phone_matching_tags=$(jq -r --arg target "$start_port:$end_port" '.outbounds[] | select((.server_ports // []) | index($target)) | .tag' "$phone_client_file")
+                win_matching_tags=$(jq -r --arg target "$start_port:$end_port" '.outbounds[] | select((.server_ports // []) | index($target)) | .tag' "$win_client_file")
+            else
+                phone_matching_tags=$(jq -r --argjson listen_port "$listen_port" '.outbounds[] | select(.server_port == $listen_port) | .tag' "$phone_client_file")
+                win_matching_tags=$(jq -r --argjson listen_port "$listen_port" '.outbounds[] | select(.server_port == $listen_port) | .tag' "$win_client_file")
+            fi
+        fi
+
+        delete_tags_from_client "$phone_matching_tags" "$phone_client_file"
+        delete_tags_from_client "$win_matching_tags" "$win_client_file"
+    fi
+}
+
+# 更新客户端 JSON 配置和防火墙规则
+function delete_tags_from_client() {
+    local tags="$1"
+    local client_file="$2"
+
+    if [ ! -f "$client_file" ]; then
+        return
     fi
 
-    # 处理 phone_matching_tags
-    echo "$phone_matching_tags" | while read -r phone_tag; do
-        if [ -n "$phone_tag" ]; then
-            jq --arg tag "$phone_tag" '.outbounds |= map(select(.tag != $tag))' "$phone_client_file" > "$temp_json"
-            mv "$temp_json" "$phone_client_file"
+    echo "$tags" | while read -r tag; do
+        if [ -n "$tag" ]; then
+            if [[ -n "$start_port" && -n "$end_port" ]]; then
+                target_port_range="$start_port:$end_port"
+                tag_port_range=$(jq -r --arg tag "$tag" '.outbounds[] | select(.tag == $tag) | (.server_ports // [])[0]' "$client_file")
+                if [[ "$tag_port_range" == "$target_port_range" ]]; then
+                    for table in iptables ip6tables; do
+                        if command -v $table &> /dev/null; then
+                            rules=$($table -t nat -nL PREROUTING --line-numbers)
+                            echo "$rules" | while read -r line; do
+                                if [[ "$line" =~ ^([0-9]+)[[:space:]].*(tcp|udp)[[:space:]]+dpts?:$start_port:$end_port.*to::[0-9]+ ]]; then
+                                    rule_num="${BASH_REMATCH[1]}"
+                                    $table -t nat -D PREROUTING "$rule_num"
+                                fi
+                            done
+                        fi
+                    done
+                fi
+            fi
 
-            phone_matching_detour=$(jq -r --arg tag "$phone_tag" '.outbounds[] | select(.detour == $tag) | .detour' "$phone_client_file")
-            phone_matching_detour_tag=$(jq -r --arg detour "$phone_matching_detour" '.outbounds[] | select(.detour == $detour) | .tag' "$phone_client_file")
+            jq --arg tag "$tag" '.outbounds |= map(select(.tag != $tag))' "$client_file" > "$temp_json" && mv "$temp_json" "$client_file"
 
-            # 删除 outbounds 中的条目
-            awk -v tag="$phone_tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" tag "\"")) print; else next; }' "$phone_client_file" > "$phone_client_file.tmp"
-            mv "$phone_client_file.tmp" "$phone_client_file"
+            local matching_detour=$(jq -r --arg tag "$tag" '.outbounds[] | select(.detour == $tag) | .detour' "$client_file")
+            local matching_detour_tag=$(jq -r --arg detour "$matching_detour" '.outbounds[] | select(.detour == $detour) | .tag' "$client_file")
 
-            if [ "$phone_tag" == "$phone_matching_detour" ]; then
-                jq --arg detour "$phone_matching_detour" '.outbounds |= map(select(.detour != $detour))' "$phone_client_file" > "$temp_json"
-                mv "$temp_json" "$phone_client_file"
-                awk -v phone_matching_detour_tag="$phone_matching_detour_tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" phone_matching_detour_tag "\"")) print; else next; }' "$phone_client_file" > "$phone_client_file.tmp"
-                mv "$phone_client_file.tmp" "$phone_client_file"
+            awk -v tag="$tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" tag "\"")) print; else next; }' "$client_file" > "$client_file.tmp"
+            mv "$client_file.tmp" "$client_file"
+
+            if [ "$tag" == "$matching_detour" ]; then
+                jq --arg detour "$matching_detour" '.outbounds |= map(select(.detour != $detour))' "$client_file" > "$temp_json" && mv "$temp_json" "$client_file"
+                awk -v detour_tag="$matching_detour_tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" detour_tag "\"")) print; else next; }' "$client_file" > "$client_file.tmp"
+                mv "$client_file.tmp" "$client_file"
             fi
         fi
     done
+}
 
-    # 处理 win_matching_tags
-    echo "$win_matching_tags" | while read -r win_tag; do
-        if [ -n "$win_tag" ]; then
-            jq --arg tag "$win_tag" '.outbounds |= map(select(.tag != $tag))' "$win_client_file" > "$temp_json"
-            mv "$temp_json" "$win_client_file"
-
-            win_matching_detour=$(jq -r --arg tag "$win_tag" '.outbounds[] | select(.detour == $tag) | .detour' "$win_client_file")
-            win_matching_detour_tag=$(jq -r --arg detour "$win_matching_detour" '.outbounds[] | select(.detour == $detour) | .tag' "$win_client_file")
-
-            # 删除 outbounds 中的条目
-            awk -v tag="$win_tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" tag "\"")) print; else next; }' "$win_client_file" > "$win_client_file.tmp"
-            mv "$win_client_file.tmp" "$win_client_file"
-
-            if [ "$win_tag" == "$win_matching_detour" ]; then
-                jq --arg detour "$win_matching_detour" '.outbounds |= map(select(.detour != $detour))' "$win_client_file" > "$temp_json"
-                mv "$temp_json" "$win_client_file"
-                awk -v win_matching_detour_tag="$win_matching_detour_tag" '!/^      "outbounds": \[$/,/^\s*]/{if (!($0 ~ "^ * \"" win_matching_detour_tag "\"")) print; else next; }' "$win_client_file" > "$win_client_file.tmp"
-                mv "$win_client_file.tmp" "$win_client_file"
-            fi
-        fi
-    done
-
-    # 删除 Clash YAML 文件中的标签
+# 整理客户端配置文件格式
+function cleanup_files_and_restart() {
     if [ -n "$matching_clash_tag" ] && [ "$selected_type" != "wireguard" ]; then
         echo "$matching_clash_tag" | while read -r tag; do
             if [ -n "$tag" ]; then
@@ -4332,16 +4485,18 @@ function delete_choice() {
         done
     fi
 
-    # 清理 JSON 文件的尾逗号
-    awk '{if ($0 ~ /],$/ && p ~ /,$/) sub(/,$/, "", p); if (NR > 1) print p; p = $0;}END{print p;}' "$phone_client_file" > "$phone_client_file.tmp"
-    mv "$phone_client_file.tmp" "$phone_client_file"
-    awk '{if ($0 ~ /],$/ && p ~ /,$/) sub(/,$/, "", p); if (NR > 1) print p; p = $0;}END{print p;}' "$win_client_file" > "$win_client_file.tmp"
-    mv "$win_client_file.tmp" "$win_client_file"
+    if [ -f "$phone_client_file" ]; then
+        awk '{if ($0 ~ /],$/ && p ~ /,$/) sub(/,$/, "", p); if (NR > 1) print p; p = $0;}END{print p;}' "$phone_client_file" > "$phone_client_file.tmp"
+        mv "$phone_client_file.tmp" "$phone_client_file"
+    fi
 
-    # 删除临时文件
+    if [ -f "$win_client_file" ]; then
+        awk '{if ($0 ~ /],$/ && p ~ /,$/) sub(/,$/, "", p); if (NR > 1) print p; p = $0;}END{print p;}' "$win_client_file" > "$win_client_file.tmp"
+        mv "$win_client_file.tmp" "$win_client_file"
+    fi
+
     [ -f "$temp_yaml" ] && rm "$temp_yaml"
 
-    # 检查配置文件中的某些字段是否需要处理
     if ! jq -e 'select(.inbounds[] | .listen == "::")' "$config_file" > /dev/null; then
         sed -i 's/^        "inbound": \[\],/        "inbound": [\n        ],/' "$config_file"
         sed -i 's/^  "inbounds": \[\],/  "inbounds": [\n  ],/' "$config_file"
@@ -4351,6 +4506,27 @@ function delete_choice() {
 
     update_client_file
     systemctl restart sing-box
+}
+
+# 删除指定节点的配置信息
+function delete_choice() {
+    local config_file="/usr/local/etc/sing-box/config.json"
+    local phone_client_file="/usr/local/etc/sing-box/phone_client.json"
+    local win_client_file="/usr/local/etc/sing-box/win_client.json"
+    local clash_yaml="/usr/local/etc/sing-box/clash.yaml"
+    local output_file="/usr/local/etc/sing-box/output.txt"
+    local temp_json="/usr/local/etc/sing-box/temp.json"
+    local temp_yaml="/usr/local/etc/sing-box/temp.yaml"
+
+    extract_types_tags
+    select_node_choice
+    process_config_deletion
+    process_output_file_deletion
+    process_clash_yaml_deletion
+    process_firewall_rules_deletion
+    process_client_files_deletion
+    cleanup_files_and_restart
+
     echo "已删除 $selected_type 的配置信息，服务端及客户端配置信息已更新，请下载新的配置文件使用！"
 }
 
@@ -4839,7 +5015,7 @@ function display_Hysteria_config_info() {
     echo -e "${CYAN}==============================================================================${NC}"  | tee -a "$output_file"
     echo "服务器地址：$server_address"  | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}"  | tee -a "$output_file"
-    echo "监听端口：$listen_port"  | tee -a "$output_file"
+    echo "监听端口: $listen_port"  | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}"  | tee -a "$output_file"
     echo "上行速度：${up_mbps}Mbps"  | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}"  | tee -a "$output_file"
@@ -4926,7 +5102,7 @@ function display_Hy2_config_info() {
     echo -e "${CYAN}==============================================================================${NC}" | tee -a "$output_file"
     echo "服务器地址：$server_address" | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}" | tee -a "$output_file"
-    echo "监听端口：$listen_port" | tee -a "$output_file"
+    echo "监听端口: $listen_port" | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}" | tee -a "$output_file"
     echo "上行速度：${up_mbps}Mbps" | tee -a "$output_file"
     echo -e "${CYAN}------------------------------------------------------------------------------${NC}" | tee -a "$output_file"
@@ -4952,7 +5128,6 @@ function display_Hy2_config_info() {
     echo "" >> "$output_file"
     echo "配置信息已保存至 $output_file"
 }
-
 
 # 生成 Hysteria2 客户端配置文件
 function display_Hy2_config_files() {
@@ -5071,7 +5246,6 @@ function display_reality_config_info() {
     echo "" >> "$output_file"
     echo "配置信息已保存至 $output_file"
 }
-
 
 # 生成 VLESS 客户端配置文件
 function display_reality_config_files() {
@@ -5208,7 +5382,6 @@ function display_vmess_config_info() {
     echo "" >> "$output_file"
     echo "配置信息已保存至 $output_file"
 }
-
 
 # 生成 VMess 客户端配置文件
 function display_vmess_config_files() {
@@ -5468,6 +5641,13 @@ function uninstall_sing_box() {
     rm -rf /usr/local/bin/sing-box
     rm -rf /usr/local/etc/sing-box
     rm -rf /etc/systemd/system/sing-box.service
+
+    for table in iptables ip6tables; do
+        if command -v $table &> /dev/null; then
+            $table -t nat -F &>/dev/null
+        fi
+    done
+
     systemctl daemon-reload
     echo "sing-box 卸载完成。"
 }
