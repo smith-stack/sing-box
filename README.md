@@ -33,7 +33,7 @@ yum update && yum -y install curl wget tar socat jq git openssl util-linux gcc-c
 ```
 ### **使用以下命令运行脚本**
 
-- **V1.5.0 请使用以下命令运行脚本**
+- **V1.10.0 请使用以下命令运行脚本**
 ```
 wget -N -O /usr/local/bin/singbox.sh https://raw.githubusercontent.com/Devmiston/sing-box/refs/heads/main/Install.sh && chmod +x /usr/local/bin/singbox.sh && ln -sf /usr/local/bin/singbox.sh /usr/local/bin/singbox && bash /usr/local/bin/singbox.sh
 ```
