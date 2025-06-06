@@ -4,7 +4,7 @@
 - **添加对Hysteria、Hysteria2协议端口跳跃的支持。**
 - **sing-box服务端及客户端配置更新。**
 - **Clash客户端DNS防泄漏配置。**
-- **V 1.12.0 Prerelease-alpha为测试版，稳定版请使用V 1.5.0。**
+- **V 1.12.0 Prerelease-alpha为测试版，稳定版请使用V 1.10.0。**
 
 ## **说明**
 - **脚本使用sing-box、Juicity内核。**
