@@ -5684,8 +5684,8 @@ function run_option() {
 function main_menu() {
 echo "╔════════════════════════════════════════════════════════════════════════╗"
 echo -e "║ ${CYAN}脚本快捷方式${NC}： singbox                                                 ║"
-echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/+EQY_InMZ2L5lODNl                      ║"
-echo -e "║ ${CYAN}项目地址${NC}: https://github.com/smith-stack/sing-box     Version：1.10.0  ║"
+echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/Devmiston                              ║"
+echo -e "║ ${CYAN}项目地址${NC}: https://github.com/Devmiston/sing-box       Version：1.10.0  ║"
 echo "╠════════════════════════════════════════════════════════════════════════╣"
 echo "║ 请选择要执行的操作：                                                   ║"
 echo -e "║${CYAN} [1]${NC}  SOCKS                             ${CYAN} [2]${NC}   Direct                   ║"
