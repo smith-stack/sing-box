@@ -6017,7 +6017,7 @@ function run_option() {
 # 主菜单
 function main_menu() {
 echo "╔════════════════════════════════════════════════════════════════════════╗"
-echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/+EQY_InMZ2L5lODNl                      ║"
+echo -e "║ ${CYAN}Telegram反馈群组${NC}： https://t.me/Devmiston                              ║"
 echo -e "║ ${CYAN}项目地址${NC}: https://github.com/smith-stack/sing-box                      ║"
 echo -e "║ ${CYAN}脚本快捷方式${NC}： singbox              Version：1.12.0  Prerelease-alpha  ║"
 echo "╠════════════════════════════════════════════════════════════════════════╣"
