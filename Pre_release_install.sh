@@ -2328,7 +2328,7 @@ function set_ech_config() {
         if [[ "$enable_ech" == "y" || "$enable_ech" == "Y" ]]; then
             get_ech_keys
             enable_ech=true
-            ech_server_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"key\": [\n$ech_key\n          ]\n        }"
+            ech_server_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"key\": [\n$ech_key\n          ]\n        }"
             break
         elif [[ "$enable_ech" == "n" || "$enable_ech" == "N" ]]; then
             enable_ech=false
@@ -3063,7 +3063,7 @@ function generate_tuic_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3099,7 +3099,7 @@ function generate_tuic_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3221,7 +3221,7 @@ function generate_Hysteria_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     if [ -z "$start_port" ] || [ -z "$end_port" ]; then
@@ -3267,7 +3267,7 @@ function generate_Hysteria_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     if [ -z "$start_port" ] || [ -z "$end_port" ]; then
@@ -3578,7 +3578,7 @@ function generate_http_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3614,7 +3614,7 @@ function generate_http_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3677,7 +3677,7 @@ function generate_anytls_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3713,7 +3713,7 @@ function generate_anytls_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -3780,7 +3780,7 @@ function generate_Hysteria2_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     if [ -z "$start_port" ] || [ -z "$end_port" ]; then
@@ -3826,7 +3826,7 @@ function generate_Hysteria2_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     if [ -z "$start_port" ] || [ -z "$end_port" ]; then
@@ -4060,7 +4060,7 @@ function generate_trojan_phone_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
@@ -4112,7 +4112,7 @@ function generate_trojan_win_client_config() {
     fi
 
     if [ -n "$ech_config" ]; then
-        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"pq_signature_schemes_enabled\": true,\n          \"dynamic_record_sizing_disabled\": false,\n          \"config\": [\n$ech_config\n          ]\n        }"
+        ech_client_config=",\n        \"ech\": {\n          \"enabled\": true,\n          \"config\": [\n$ech_config\n          ]\n        }"
     fi
 
     while true; do
