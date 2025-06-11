@@ -1472,8 +1472,8 @@ function check_iptables_installed() {
 # 设置端口范围
 function get_port_range() {
     while true; do
-        read -p "请输入端口跳跃的起始端口 (默认：20000): " start_port
-        start_port=${start_port:-20000}
+        read -p "请输入端口跳跃的起始端口 (默认：2080): " start_port
+        start_port=${start_port:-2080}
 
         if [[ $start_port =~ ^[1-9][0-9]{0,4}$ && $start_port -le 65535 ]]; then
             break
@@ -1483,8 +1483,8 @@ function get_port_range() {
     done
 
     while true; do
-        read -p "请输入端口跳跃的终止端口 (默认：50000): " end_port
-        end_port=${end_port:-50000}
+        read -p "请输入端口跳跃的终止端口 (默认：3000): " end_port
+        end_port=${end_port:-3000}
 
         if [[ $end_port =~ ^[1-9][0-9]{0,4}$ && $end_port -le 65535 ]]; then
             if [ "$end_port" -le "$start_port" ]; then
