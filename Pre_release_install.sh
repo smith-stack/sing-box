@@ -4343,9 +4343,10 @@ function extract_types_tags() {
 function select_node_choice() {
     valid_choice=false
     while [ "$valid_choice" == false ]; do
-        read -p "请选择要删除的节点配置（输入对应的数字）: " choice
-        echo "你选择了: $choice"
-        if [[ ! $choice =~ ^[0-9]+$ || $choice -lt 1 || $choice -gt ${#types[@]} ]]; then
+        read -p "请选择要删除的节点配置（请输入对应的数字，输入 0 返回主菜单）: " choice
+        if [[ "$choice" == "0" ]]; then
+            return 1
+        elif [[ ! $choice =~ ^[0-9]+$ || $choice -lt 1 || $choice -gt ${#types[@]} ]]; then
             echo -e "${RED}错误：无效的选择，请重新输入！${NC}"
         else
             valid_choice=true
@@ -4519,7 +4520,9 @@ function delete_choice() {
     local temp_yaml="/usr/local/etc/sing-box/temp.yaml"
 
     extract_types_tags
-    select_node_choice
+    if ! select_node_choice; then
+        return 1
+    fi
     process_config_deletion
     process_output_file_deletion
     process_clash_yaml_deletion
@@ -6111,8 +6114,11 @@ echo "╚═══════════════════════�
             exit 0
             ;;
         18)
-            delete_choice
-            exit 0
+            if delete_choice; then
+                exit 0
+            else
+                main_menu
+            fi
             ;;
         19)
             update_proxy_tool
